@@ -150,11 +150,6 @@ class ReflexCaptureAgent(CaptureAgent):
 
 
 class OffensiveReflexAgent(ReflexCaptureAgent):
-  """
-A reflex agent that seeks food. This is an agent
-we give you to get an idea of what an offensive agent might look like,
-but it is by no means the best or only way to build an offensive agent.
-"""
 
   def choose_action(self, game_state):
 
@@ -196,7 +191,6 @@ but it is by no means the best or only way to build an offensive agent.
                   best_margin = margin
                   target = cap
 
-
       if target is None:
           food_list = self.get_food(game_state).as_list()
           if not food_list:
@@ -219,12 +213,7 @@ but it is by no means the best or only way to build an offensive agent.
       return random.choice(actions) if actions else Directions.STOP
 
   def a_star_search(self, game_state, start, goal):
-        """
-        A* search:
-        - Heuristic: maze distance to goal (fallback to Manhattan).
-        - Safety bias: small penalty if near visible enemy defenders while invading.
-        """
-
+ 
         if start == goal:
             return []
 
@@ -232,7 +221,6 @@ but it is by no means the best or only way to build an offensive agent.
         frontier.push((start, [], 0), 0)
         visited = set()
 
-        # Precompute visible enemy defenders (only those we can currently see and who are not Pacman)
         visible_defenders = []
         for i in self.get_opponents(game_state):
             s = game_state.get_agent_state(i)
@@ -256,13 +244,11 @@ but it is by no means the best or only way to build an offensive agent.
                 new_path = path + [action]
                 new_cost = cost_so_far + step_cost
 
-                # Base heuristic: prefer maze distance, fallback to Manhattan
                 try:
                     heuristic = self.get_maze_distance(next_pos, goal)
                 except Exception:
                     heuristic = abs(next_pos[0] - goal[0]) + abs(next_pos[1] - goal[1])
 
-                # Safety: small, bounded penalty near visible defenders while invading
                 if game_state.get_agent_state(self.index).is_pacman and visible_defenders:
                     md = min(abs(next_pos[0] - d[0]) + abs(next_pos[1] - d[1]) for d in visible_defenders)
                     if md <= 2:
@@ -270,8 +256,6 @@ but it is by no means the best or only way to build an offensive agent.
                 frontier.push((next_pos, new_path, new_cost), new_cost + heuristic)
 
         return []
-
-
 
   def get_successors(self, game_state, position):
 
@@ -285,15 +269,7 @@ but it is by no means the best or only way to build an offensive agent.
       return successors
 
 class DefensiveReflexAgent(ReflexCaptureAgent):
-  """
-  A reflex agent that keeps its side Pacman-free. Again,
-  this is to give you an idea of what a defensive agent
-  could be like.  It is not the best or only way to make
-  such an agent. 
-  Camper ghost: sit on a chosen border (camp) point.
-  If an invader (enemy Pacman) is visible, chase it with A*.
-  Otherwise stay at (or return to) camp.
-  """
+
   def __init__(self, index, time_for_computing=.1):
       super().__init__(index, time_for_computing)
       self.camp_position = None
